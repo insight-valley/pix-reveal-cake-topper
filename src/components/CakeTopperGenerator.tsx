@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Sparkles, Heart, Star, Gift } from "lucide-react";
@@ -87,17 +87,17 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
             <CardContent className="p-6 space-y-6">
               <div>
                 <label className="text-lg font-semibold text-foreground mb-4 block">
-                  Digite o texto para seu topo de bolo:
+                  Digite o prompt detalhado para seu topo de bolo:
                 </label>
-                <Input
-                  placeholder="Ex: Parabéns Ana!"
+                <Textarea
+                  placeholder="Ex: Topo de bolo em estilo adesivo recortado, tema 'Parabéns Ana' 100% rosa..."
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  className="text-lg h-12 border-2 border-primary/20 focus:border-primary"
-                  maxLength={50}
+                  className="text-base min-h-[120px] border-2 border-primary/20 focus:border-primary resize-vertical"
+                  maxLength={2000}
                 />
                 <p className="text-sm text-muted-foreground mt-2">
-                  Máximo 50 caracteres
+                  Máximo 2000 caracteres - Seja específico para melhores resultados
                 </p>
               </div>
 
