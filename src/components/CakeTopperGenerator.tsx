@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Sparkles, Heart, Star, Gift } from "lucide-react";
 import { toast } from "sonner";
 import cakeTopperExample from "@/assets/cake-topper-example.jpg";
+import { PromptCatalog } from "./PromptCatalog";
 
 const EXAMPLE_TEXTS = [
   "Parabéns",
@@ -26,6 +27,7 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [showPayment, setShowPayment] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
+  const [selectedPrompt, setSelectedPrompt] = useState<string>("");
 
   const handleGenerate = async () => {
     if (!text.trim()) {
@@ -54,6 +56,12 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
 
   const handleExampleClick = (example: string) => {
     setText(example);
+  };
+
+  const handleSelectPrompt = (prompt: string, title: string) => {
+    setSelectedPrompt(prompt);
+    setText(title.replace(/^[^"]*"([^"]*)".*$/, '$1') || title);
+    toast.success(`Prompt "${title}" selecionado!`);
   };
 
   return (
@@ -112,6 +120,9 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
                   ))}
                 </div>
               </div>
+
+              {/* Catálogo de Prompts */}
+              <PromptCatalog onSelectPrompt={handleSelectPrompt} />
 
               <Button
                 onClick={handleGenerate}
