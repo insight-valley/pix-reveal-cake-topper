@@ -60,7 +60,7 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
 
   const handleSelectPrompt = (prompt: string, title: string) => {
     setSelectedPrompt(prompt);
-    setText(title.replace(/^[^"]*"([^"]*)".*$/, '$1') || title);
+    setText(prompt);
     toast.success(`Prompt "${title}" selecionado!`);
   };
 
