@@ -7,6 +7,7 @@ import { Loader2, Sparkles, Heart, Star, Gift } from "lucide-react";
 import { toast } from "sonner";
 import cakeTopperExample from "@/assets/cake-topper-example.jpg";
 import { PromptCatalog } from "./PromptCatalog";
+import { useImageGeneration } from "@/hooks/useImageGeneration";
 
 const EXAMPLE_TEXTS = [
   "Parabéns",
@@ -23,11 +24,10 @@ interface CakeTopperGeneratorProps {}
 
 export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
   const [text, setText] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [showPayment, setShowPayment] = useState(false);
-  const [isPaid, setIsPaid] = useState(false);
   const [selectedPrompt, setSelectedPrompt] = useState<string>("");
+
+  const { generateImage, isGenerating, error } = useImageGeneration();
 
   const handleGenerate = async () => {
     if (!text.trim()) {
@@ -35,24 +35,19 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
       return;
     }
 
-    setIsGenerating(true);
     setGeneratedImage(null);
     
-    // Simula geração da imagem
-    setTimeout(() => {
-      setGeneratedImage(cakeTopperExample);
-      setIsGenerating(false);
-      setShowPayment(true);
-      toast.success("Imagem gerada com sucesso!");
-    }, 3000);
+    // Usar a imagem de exemplo como base (para o fluxo de edição de imagem)
+    const result = await generateImage({
+      prompt: text,
+      imageUrl: cakeTopperExample
+    });
+
+    if (result) {
+      setGeneratedImage(result);
+    }
   };
 
-  const handlePayment = () => {
-    // Simula pagamento PIX
-    toast.success("Pagamento realizado! Baixando imagem...");
-    setIsPaid(true);
-    setShowPayment(false);
-  };
 
   const handleExampleClick = (example: string) => {
     setText(example);
@@ -173,54 +168,21 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
                   </div>
                 )}
 
-                {generatedImage && (
-                  <div className="relative w-full h-full">
-                    <img
-                      src={generatedImage}
-                      alt="Topo de bolo gerado"
-                      className={`w-full h-full object-cover rounded-lg transition-all duration-500 ${
-                        !isPaid ? 'blur-md' : ''
-                      }`}
-                    />
-                    
-                    {!isPaid && (
-                      <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm flex items-center justify-center rounded-lg">
-                        <div className="text-center p-4 sm:p-6 bg-background/90 rounded-lg shadow-cake border-2 border-primary/20 mx-2">
-                          <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 bg-gradient-primary rounded-full flex items-center justify-center">
-                            <Gift className="w-6 h-6 sm:w-8 sm:h-8 text-primary-foreground" />
-                          </div>
-                          <h4 className="text-lg sm:text-xl font-bold text-foreground mb-2">
-                            Sua imagem está pronta!
-                          </h4>
-                          <p className="text-muted-foreground mb-3 sm:mb-4 text-sm sm:text-base">
-                            Faça o pagamento para baixar em alta qualidade
-                          </p>
-                          <div className="space-y-3">
-                            <div className="text-xl sm:text-2xl font-bold text-primary">
-                              R$ 9,90
-                            </div>
-                            <Button
-                              onClick={handlePayment}
-                              variant="cake"
-                              size="lg"
-                              className="w-full h-10 sm:h-12 text-sm sm:text-base"
-                            >
-                              Pagar via PIX
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {isPaid && (
-                      <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
-                        <Badge variant="default" className="bg-green-500 text-white shadow-soft text-xs sm:text-sm">
-                          ✓ Pago
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                )}
+                 {generatedImage && (
+                   <div className="relative w-full h-full">
+                     <img
+                       src={generatedImage}
+                       alt="Topo de bolo gerado"
+                       className="w-full h-full object-cover rounded-lg transition-all duration-500"
+                     />
+                     
+                     <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
+                       <Badge variant="default" className="bg-green-500 text-white shadow-soft text-xs sm:text-sm">
+                         ✓ Gerado
+                       </Badge>
+                     </div>
+                   </div>
+                 )}
 
                 {!generatedImage && !isGenerating && (
                   <div className="absolute inset-0 flex items-center justify-center text-center p-4">
@@ -236,7 +198,7 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
                 )}
               </div>
 
-              {isPaid && (
+              {generatedImage && (
                 <div className="mt-4 sm:mt-6 space-y-3 animate-fade-in">
                   <Button variant="gradient" size="lg" className="w-full h-10 sm:h-12 text-sm sm:text-base">
                     📥 Baixar Imagem HD

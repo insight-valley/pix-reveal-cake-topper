@@ -59,6 +59,36 @@ export type Database = {
           },
         ]
       }
+      generated_images: {
+        Row: {
+          created_at: string
+          generated_image_url: string
+          id: string
+          metadata: Json | null
+          original_image_url: string
+          prompt: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          generated_image_url: string
+          id?: string
+          metadata?: Json | null
+          original_image_url: string
+          prompt: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          generated_image_url?: string
+          id?: string
+          metadata?: Json | null
+          original_image_url?: string
+          prompt?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pokemon: {
         Row: {
           attack: number
@@ -197,6 +227,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profiles: {
+        Row: {
+          created_at: string
+          credits: number
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       mv_schema_context: {
@@ -223,6 +277,10 @@ export type Database = {
       }
     }
     Functions: {
+      consume_credits: {
+        Args: { user_id: string; amount: number }
+        Returns: boolean
+      }
       generate_schema_context_universal: {
         Args: Record<PropertyKey, never>
         Returns: {
