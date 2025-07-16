@@ -48,7 +48,6 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
     }
   };
 
-
   const handleExampleClick = (example: string) => {
     setText(example);
   };
@@ -168,21 +167,21 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
                   </div>
                 )}
 
-                 {generatedImage && (
-                   <div className="relative w-full h-full">
-                     <img
-                       src={generatedImage}
-                       alt="Topo de bolo gerado"
-                       className="w-full h-full object-cover rounded-lg transition-all duration-500"
-                     />
-                     
-                     <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
-                       <Badge variant="default" className="bg-green-500 text-white shadow-soft text-xs sm:text-sm">
-                         ✓ Gerado
-                       </Badge>
-                     </div>
-                   </div>
-                 )}
+                {generatedImage && (
+                  <div className="relative w-full h-full">
+                    <img
+                      src={generatedImage}
+                      alt="Topo de bolo gerado"
+                      className="w-full h-full object-cover rounded-lg transition-all duration-500"
+                    />
+                    
+                    <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
+                      <Badge variant="default" className="bg-green-500 text-white shadow-soft text-xs sm:text-sm">
+                        ✓ Gerado
+                      </Badge>
+                    </div>
+                  </div>
+                )}
 
                 {!generatedImage && !isGenerating && (
                   <div className="absolute inset-0 flex items-center justify-center text-center p-4">
@@ -203,7 +202,12 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
                   <Button variant="gradient" size="lg" className="w-full h-10 sm:h-12 text-sm sm:text-base">
                     📥 Baixar Imagem HD
                   </Button>
-                  <Button variant="outline" size="lg" className="w-full h-10 sm:h-12 text-sm sm:text-base">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="w-full h-10 sm:h-12 text-sm sm:text-base"
+                    onClick={() => setGeneratedImage(null)}
+                  >
                     🎨 Gerar Nova Imagem
                   </Button>
                 </div>
@@ -242,7 +246,7 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
               </div>
               <h3 className="font-semibold text-foreground mb-2 text-sm sm:text-base">Entrega Rápida</h3>
               <p className="text-muted-foreground text-xs sm:text-sm">
-                Receba sua imagem em segundos após o pagamento via PIX
+                Receba sua imagem em segundos, sem necessidade de pagamento para testar
               </p>
             </div>
           </div>
