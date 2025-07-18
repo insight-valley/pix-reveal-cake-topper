@@ -8,6 +8,8 @@ import { Loader2, Sparkles, Heart, Star, Gift, LogOut, User } from "lucide-react
 import { toast } from "sonner";
 import cakeTopperExample from "@/assets/cake-topper-example.jpg";
 import { PromptCatalog } from "./PromptCatalog";
+import { PWAInstallPrompt } from "./PWAInstallPrompt";
+import { OfflineIndicator } from "./OfflineIndicator";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -307,6 +309,10 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
           </div>
         </div>
       </div>
+      
+      {/* PWA Components */}
+      <PWAInstallPrompt />
+      <OfflineIndicator />
     </div>
   );
 };
