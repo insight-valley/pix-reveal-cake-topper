@@ -1,13 +1,15 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Sparkles, Heart, Star, Gift } from "lucide-react";
+import { Loader2, Sparkles, Heart, Star, Gift, LogOut, User } from "lucide-react";
 import { toast } from "sonner";
 import cakeTopperExample from "@/assets/cake-topper-example.jpg";
 import { PromptCatalog } from "./PromptCatalog";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
+import { useAuth } from "@/hooks/useAuth";
 
 const EXAMPLE_TEXTS = [
   "Parabéns",
@@ -23,11 +25,50 @@ const EXAMPLE_TEXTS = [
 interface CakeTopperGeneratorProps {}
 
 export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
+  const navigate = useNavigate();
   const [text, setText] = useState("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [selectedPrompt, setSelectedPrompt] = useState<string>("");
 
   const { generateImage, isGenerating, error } = useImageGeneration();
+  const { user, loading, signOut, isAuthenticated } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p>Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-subtle">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="p-6 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+              <User className="w-8 h-8 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Acesso Necessário</h2>
+            <p className="text-muted-foreground mb-6">
+              Para gerar toppers personalizados, você precisa fazer login ou criar uma conta.
+            </p>
+            <Button 
+              onClick={() => navigate('/auth')} 
+              className="w-full"
+              size="lg"
+            >
+              <User className="w-4 h-4 mr-2" />
+              Fazer Login / Criar Conta
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleGenerate = async () => {
     if (!text.trim()) {
@@ -63,15 +104,29 @@ export const CakeTopperGenerator = ({}: CakeTopperGeneratorProps) => {
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8 animate-fade-in">
-          <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
-            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-primary animate-bounce-soft" />
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              Gerador de Topo de Bolo
-            </h1>
-            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-primary animate-bounce-soft" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex-1"></div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-primary animate-bounce-soft" />
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                Gerador de Topo de Bolo
+              </h1>
+              <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-primary animate-bounce-soft" />
+            </div>
+            <div className="flex-1 flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={signOut}
+                className="gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Sair
+              </Button>
+            </div>
           </div>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
-            Crie topos de bolo personalizados com textos lindos e designs únicos para suas celebrações especiais!
+            Olá, {user?.email}! Crie topos de bolo personalizados com textos lindos e designs únicos.
           </p>
         </div>
 
