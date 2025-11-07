@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Langfuse } from "langfuse";
+import { createClient } from "@supabase/supabase-js";
+import sharp from "sharp";
 
 // Inicializar Langfuse Client (apenas se credenciais estiverem configuradas)
 let langfuse: Langfuse | null = null;
@@ -38,29 +40,29 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { prompt, imageUrl } = (await req.json()) as {
+    const { prompt, imageId } = (await req.json()) as {
       prompt: string;
-      imageUrl: string;
+      imageId: string;
     };
 
     console.log(`[${requestId}] Request payload:`, {
       prompt: prompt?.substring(0, 100) + (prompt?.length > 100 ? "..." : ""),
-      imageUrl: imageUrl?.substring(0, 50) + "...",
       promptLength: prompt?.length,
+      imageId,
     });
 
     // Adicionar input ao trace
     trace?.update({
       input: {
         originalPrompt: prompt,
-        imageUrl: imageUrl?.substring(0, 100),
+        imageId,
       },
     });
 
-    if (!prompt || !imageUrl) {
+    if (!prompt || !imageId) {
       console.log(`[${requestId}] Missing required fields:`, {
         prompt: !!prompt,
-        imageUrl: !!imageUrl,
+        imageId: !!imageId,
       });
 
       trace?.update({
@@ -70,7 +72,7 @@ export async function POST(req: NextRequest) {
       await langfuse?.flushAsync();
 
       return NextResponse.json(
-        { error: "Prompt e imageUrl são obrigatórios" },
+        { error: "Prompt e imageId são obrigatórios" },
         { status: 400 }
       );
     }
@@ -86,12 +88,26 @@ export async function POST(req: NextRequest) {
       await langfuse?.flushAsync();
 
       return NextResponse.json(
-        { error: "Chave da API OpenAI não configurada" },
+        {
+          error:
+            "Ocorreu um erro inesperado ao gerar sua imagem. Por favor, tente novamente. Se o problema persistir, entre em contato conosco para que possamos ajudar.",
+          errorType: "server_error",
+          retryable: true,
+        },
         { status: 500 }
       );
     }
 
-    const enhancedPrompt = `Create a beautiful cake topper design with the text "${prompt}". The design should be elegant, festive, and suitable for a celebration cake. The background should be transparent or white.`;
+    const enhancedPrompt = `Create a beautiful cake topper design with the text "${prompt}". 
+
+CRITICAL REQUIREMENTS FOR PRINT AND CUT:
+- Each design element (text, characters, decorations) MUST have a solid white border of at least 1cm (approximately 10-12% of the image size) around it
+- Leave adequate spacing (minimum 1.5cm) between different elements to allow clean cutting
+- Use a flat sticker-style design with clear white outlines that separate each element from the background
+- The design should look like individual stickers that can be cut out separately with scissors
+- All elements should have a clean, bold outline to facilitate cutting along the edges
+
+STYLE: The design should be elegant, festive, and suitable for a celebration cake. Use vibrant colors but ensure contrast with the white borders. The overall style must be clean and printable.`;
 
     console.log(`[${requestId}] Enhanced prompt created:`, {
       originalLength: prompt.length,
@@ -167,8 +183,18 @@ export async function POST(req: NextRequest) {
 
       await langfuse?.flushAsync();
 
+      // Determinar mensagem amigável baseada no tipo de erro
+      const isServerError = response.status >= 500;
+      const errorMessage = isServerError
+        ? "Ocorreu um erro inesperado ao gerar sua imagem. Por favor, tente novamente. Se o problema persistir, entre em contato conosco para que possamos ajudar."
+        : errorData.error?.message || "Erro ao processar sua solicitação. Tente novamente.";
+
       return NextResponse.json(
-        { error: "Erro na API da OpenAI", details: errorData },
+        {
+          error: errorMessage,
+          errorType: isServerError ? "server_error" : "client_error",
+          retryable: isServerError,
+        },
         { status: response.status }
       );
     }
@@ -204,7 +230,12 @@ export async function POST(req: NextRequest) {
       await langfuse?.flushAsync();
 
       return NextResponse.json(
-        { error: "Resposta inválida da OpenAI" },
+        {
+          error:
+            "Ocorreu um erro inesperado ao gerar sua imagem. Por favor, tente novamente. Se o problema persistir, entre em contato conosco para que possamos ajudar.",
+          errorType: "server_error",
+          retryable: true,
+        },
         { status: 500 }
       );
     }
@@ -233,14 +264,244 @@ export async function POST(req: NextRequest) {
       model: "dall-e-3",
     });
 
-    // Registrar sucesso no Langfuse
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error(
+        `[${requestId}] Missing Supabase configuration for image persistence`
+      );
+
+      generation?.update({
+        output: { error: "Missing Supabase configuration" },
+        statusMessage: "supabase-config-missing",
+      });
+
+      trace?.update({
+        output: { error: "Supabase configuration missing" },
+      });
+
+      await langfuse?.flushAsync();
+
+      return NextResponse.json(
+        {
+          error:
+            "Ocorreu um erro inesperado ao gerar sua imagem. Por favor, tente novamente. Se o problema persistir, entre em contato conosco para que possamos ajudar.",
+          errorType: "server_error",
+          retryable: true,
+        },
+        { status: 500 }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    const hdStoragePath = `${imageId}.png`;
+    const previewStoragePath = `${imageId}.jpeg`;
+
+    let uploadError: Error | null = null;
+    let imageBuffer: Buffer | null = null;
+
+    // Obter buffer da imagem
+    if (data?.data?.[0]?.b64_json) {
+      console.log(`[${requestId}] Processing image from base64`);
+      imageBuffer = Buffer.from(data.data[0].b64_json, "base64");
+    } else if (data?.data?.[0]?.url) {
+      console.log(`[${requestId}] Fetching image from OpenAI URL`);
+      try {
+        const imageResponse = await fetch(data.data[0].url);
+        if (!imageResponse.ok) {
+          uploadError = new Error(
+            `Failed to fetch image from OpenAI URL: HTTP ${imageResponse.status}`
+          );
+        } else {
+          const imageArrayBuffer = await imageResponse.arrayBuffer();
+          imageBuffer = Buffer.from(imageArrayBuffer);
+        }
+      } catch (error) {
+        uploadError = error as Error;
+        console.error(`[${requestId}] Unexpected error fetching image:`, error);
+      }
+    }
+
+    if (!imageBuffer && !uploadError) {
+      uploadError = new Error("No image data available");
+    }
+
+    if (imageBuffer && !uploadError) {
+      try {
+        // 1. Salvar imagem HD original
+        console.log(`[${requestId}] Uploading HD image to Supabase Storage`);
+        const { error: hdError } = await supabase.storage
+          .from("generated-images")
+          .upload(hdStoragePath, imageBuffer, {
+            contentType: "image/png",
+            upsert: true,
+          });
+
+        if (hdError) {
+          uploadError = hdError;
+          console.error(`[${requestId}] Failed to upload HD image:`, hdError);
+        } else {
+          // 2. Criar preview degradado com watermark
+          console.log(`[${requestId}] Creating watermarked preview`);
+
+          const sharpImage = sharp(imageBuffer);
+          const metadata = await sharpImage.metadata();
+
+          // Redimensionar para 800px de largura mantendo aspect ratio
+          const previewWidth = 800;
+          const previewHeight = Math.round(
+            (metadata.height || 1024) *
+              (previewWidth / (metadata.width || 1024))
+          );
+
+          // Criar texto do watermark SVG
+          const watermarkText = "Cake Maker";
+          const fontSize = 60;
+          const textWidth = watermarkText.length * fontSize * 0.6; // Aproximação
+
+          // SVG com texto diagonal e semi-transparente
+          const watermarkSvg = `
+            <svg width="${previewWidth}" height="${previewHeight}">
+              <defs>
+                <style>
+                  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&amp;display=swap');
+                </style>
+              </defs>
+              <g transform="translate(${previewWidth / 2}, ${
+            previewHeight / 2
+          }) rotate(-30)">
+                <text
+                  x="0"
+                  y="0"
+                  text-anchor="middle"
+                  font-family="Inter, Arial, sans-serif"
+                  font-size="${fontSize}"
+                  font-weight="700"
+                  fill="white"
+                  fill-opacity="0.4"
+                  stroke="black"
+                  stroke-width="2"
+                  stroke-opacity="0.3"
+                >${watermarkText}</text>
+              </g>
+            </svg>
+          `;
+
+          const previewBuffer = await sharpImage
+            .resize(previewWidth, previewHeight, {
+              fit: "inside",
+              withoutEnlargement: true,
+            })
+            .composite([
+              {
+                input: Buffer.from(watermarkSvg),
+                top: 0,
+                left: 0,
+              },
+            ])
+            .jpeg({ quality: 70 })
+            .toBuffer();
+
+          console.log(`[${requestId}] Uploading preview to Supabase Storage`);
+          const { error: previewError } = await supabase.storage
+            .from("generated-previews")
+            .upload(previewStoragePath, previewBuffer, {
+              contentType: "image/jpeg",
+              upsert: true,
+            });
+
+          if (previewError) {
+            console.error(
+              `[${requestId}] Failed to upload preview:`,
+              previewError
+            );
+            // Não falhar se preview não subir, mas logar
+          }
+        }
+      } catch (error) {
+        uploadError = error as Error;
+        console.error(
+          `[${requestId}] Unexpected error processing images:`,
+          error
+        );
+      }
+    }
+
+    if (uploadError) {
+      generation?.update({
+        output: { error: uploadError.message },
+        statusMessage: "storage-upload-failed",
+      });
+
+      trace?.update({
+        output: { error: uploadError.message },
+      });
+
+      await langfuse?.flushAsync();
+
+      return NextResponse.json(
+        {
+          error:
+            "Ocorreu um erro inesperado ao salvar sua imagem. Por favor, tente novamente. Se o problema persistir, entre em contato conosco para que possamos ajudar.",
+          errorType: "server_error",
+          retryable: true,
+        },
+        { status: 500 }
+      );
+    }
+
+    // Gerar URL assinada apenas para o PREVIEW (não para HD)
+    const previewSignedUrlResult = await supabase.storage
+      .from("generated-previews")
+      .createSignedUrl(previewStoragePath, 60 * 60 * 12);
+
+    if (
+      previewSignedUrlResult.error ||
+      !previewSignedUrlResult.data?.signedUrl
+    ) {
+      const signedUrlError = previewSignedUrlResult.error;
+      generation?.update({
+        output: {
+          error: signedUrlError?.message ?? "preview-signed-url-failed",
+        },
+        statusMessage: "preview-signed-url-failed",
+      });
+
+      trace?.update({
+        output: {
+          error: signedUrlError?.message ?? "preview-signed-url-failed",
+        },
+      });
+
+      await langfuse?.flushAsync();
+
+      return NextResponse.json(
+        {
+          error:
+            "Ocorreu um erro inesperado ao processar sua imagem. Por favor, tente novamente. Se o problema persistir, entre em contato conosco para que possamos ajudar.",
+          errorType: "server_error",
+          retryable: true,
+        },
+        { status: 500 }
+      );
+    }
+
+    // Retornar apenas preview URL, NÃO imageUrl HD
+    const responsePayload = {
+      imageId,
+      previewUrl: previewSignedUrlResult.data.signedUrl,
+      metadata,
+    };
+
     generation?.update({
       output: {
         imageGenerated: true,
-        imageSizeKB: imageData.length
-          ? Math.round(imageData.length / 1024)
-          : null,
-        url: data?.data?.[0]?.url ? true : false,
+        imageId,
+        hdStoragePath,
+        previewStoragePath,
+        signed: true,
       },
       usage: generationUsage,
       metadata: {
@@ -251,7 +512,9 @@ export async function POST(req: NextRequest) {
     trace?.update({
       output: {
         success: true,
-        imageUrl: imageUrlGenerated.substring(0, 100) + "...",
+        imageId,
+        hdStoragePath,
+        previewStoragePath,
         metadata,
       },
       metadata: {
@@ -259,10 +522,9 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Flush para garantir que os dados sejam enviados ao Langfuse
     await langfuse?.flushAsync();
 
-    return NextResponse.json({ imageUrl: imageUrlGenerated, metadata });
+    return NextResponse.json(responsePayload);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.log(`[${requestId}] Unexpected error:`, {
@@ -278,7 +540,12 @@ export async function POST(req: NextRequest) {
     await langfuse?.flushAsync();
 
     return NextResponse.json(
-      { error: "Erro interno do servidor", details: message },
+      {
+        error:
+          "Ocorreu um erro inesperado ao gerar sua imagem. Por favor, tente novamente. Se o problema persistir, entre em contato conosco para que possamos ajudar.",
+        errorType: "server_error",
+        retryable: true,
+      },
       { status: 500 }
     );
   }

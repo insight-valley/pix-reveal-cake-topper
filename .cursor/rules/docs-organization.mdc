@@ -1,0 +1,181 @@
+---
+alwaysApply: true
+---
+# Cursor Rules - PIX Reveal Cake Topper
+
+## 📚 Documentação
+
+### Estrutura de Documentação
+- **NUNCA** crie arquivos `.md` na raiz do projeto (exceto README.md)
+- Toda documentação deve estar em `/docs/` seguindo a estrutura:
+  - `/docs/setup/` - Configurações e setup
+  - `/docs/guides/` - Guias e tutoriais
+  - `/docs/reports/` - Relatórios e lições aprendidas
+
+### Antes de Criar Documentação
+1. **SEMPRE** consulte `/docs/INDEX.md` para ver a estrutura
+2. **SEMPRE** busque documentos existentes antes de criar novos
+3. **SEMPRE** atualize docs existentes ao invés de criar duplicatas
+4. Se criar novo doc, adicione referência ao `/docs/INDEX.md`
+
+### Reports e Lições Aprendidas
+- Reports em `/docs/reports/` são históricos importantes
+- **NÃO** delete reports antigos, eles contêm lições aprendidas
+- Ao encontrar problemas, **SEMPRE** consulte reports existentes
+- Documentação de fixes deve ir para `/docs/reports/`
+
+### Atualização de Documentação
+- Ao fazer mudanças significativas, atualize os docs relacionados
+- Se alterar API/configuração, atualize `/docs/setup/`
+- Se adicionar features, atualize `/docs/guides/`
+- Se corrigir bugs complexos, documente em `/docs/reports/`
+
+## 🏗️ Arquitetura
+
+### Stack
+- Next.js (App Router)
+- TypeScript
+- Supabase (Database + Edge Functions)
+- Abacate Pay (Pagamentos)
+- OpenRouter + Google Gemini (Geração de imagens)
+
+### Estrutura de Pastas
+- `/app/` - Next.js App Router (rotas e API routes)
+- `/src/components/` - Componentes React
+- `/src/hooks/` - Custom hooks
+- `/src/lib/` - Utilitários e integrações
+- `/supabase/` - Migrations e Edge Functions
+- `/docs/` - Toda a documentação
+
+## 💳 Pagamentos
+
+- **Provider**: Abacate Pay (migrado de Mercado Pago)
+- Consulte `/docs/setup/ABACATEPAY_INTEGRATION.md` antes de modificar
+- Webhooks configurados para atualização automática de status
+- Sempre teste em ambiente dev antes de fazer alterações
+
+## 🎨 Geração de Imagens
+
+- Engine: Google Gemini Flash 2.0 via OpenRouter
+- Prompt engineering crítico para qualidade
+- Consulte `/docs/guides/PROMPT_*` antes de alterar prompts
+- Biblioteca de prompts testados em `/docs/guides/`
+
+## 🧪 Testes
+
+- Sempre teste fluxo completo: prompt → geração → pagamento → download
+- Consulte `/docs/reports/FULL_UX_TEST_REPORT_V*.md` para casos de teste
+- Documente novos bugs em `/docs/reports/`
+
+## ⚠️ Cuidados Especiais
+
+1. **Nunca** exponha chaves de API no código
+2. **Sempre** use variáveis de ambiente
+3. **Consulte** documentação existente antes de reimplementar
+4. **Atualize** docs ao fazer mudanças
+5. **Preserve** histórico em `/docs/reports/`
+
+## 🔄 Workflow de Desenvolvimento
+
+1. Consulte `/docs/INDEX.md` para encontrar documentação relevante
+2. Leia reports em `/docs/reports/` se enfrentar problemas similares
+3. Faça mudanças no código
+4. Atualize documentação relacionada
+5. Adicione lições aprendidas em `/docs/reports/` se relevante
+
+## 📝 Estilo de Código
+
+- TypeScript strict mode
+- Componentes funcionais com hooks
+- Nomenclatura em inglês no código
+- Comentários em português quando necessário
+- Prettier para formatação
+# Cursor Rules - PIX Reveal Cake Topper
+
+## 📚 Documentação
+
+### Estrutura de Documentação
+- **NUNCA** crie arquivos `.md` na raiz do projeto (exceto README.md)
+- Toda documentação deve estar em `/docs/` seguindo a estrutura:
+  - `/docs/setup/` - Configurações e setup
+  - `/docs/guides/` - Guias e tutoriais
+  - `/docs/reports/` - Relatórios e lições aprendidas
+
+### Antes de Criar Documentação
+1. **SEMPRE** consulte `/docs/INDEX.md` para ver a estrutura
+2. **SEMPRE** busque documentos existentes antes de criar novos
+3. **SEMPRE** atualize docs existentes ao invés de criar duplicatas
+4. Se criar novo doc, adicione referência ao `/docs/INDEX.md`
+
+### Reports e Lições Aprendidas
+- Reports em `/docs/reports/` são históricos importantes
+- **NÃO** delete reports antigos, eles contêm lições aprendidas
+- Ao encontrar problemas, **SEMPRE** consulte reports existentes
+- Documentação de fixes deve ir para `/docs/reports/`
+
+### Atualização de Documentação
+- Ao fazer mudanças significativas, atualize os docs relacionados
+- Se alterar API/configuração, atualize `/docs/setup/`
+- Se adicionar features, atualize `/docs/guides/`
+- Se corrigir bugs complexos, documente em `/docs/reports/`
+
+## 🏗️ Arquitetura
+
+### Stack
+- Next.js (App Router)
+- TypeScript
+- Supabase (Database + Edge Functions)
+- Abacate Pay (Pagamentos)
+- OpenRouter + Google Gemini (Geração de imagens)
+
+### Estrutura de Pastas
+- `/app/` - Next.js App Router (rotas e API routes)
+- `/src/components/` - Componentes React
+- `/src/hooks/` - Custom hooks
+- `/src/lib/` - Utilitários e integrações
+- `/supabase/` - Migrations e Edge Functions
+- `/docs/` - Toda a documentação
+
+## 💳 Pagamentos
+
+- **Provider**: Abacate Pay (migrado de Mercado Pago)
+- Consulte `/docs/setup/ABACATEPAY_INTEGRATION.md` antes de modificar
+- Webhooks configurados para atualização automática de status
+- Sempre teste em ambiente dev antes de fazer alterações
+
+## 🎨 Geração de Imagens
+
+- Engine: Google Gemini Flash 2.0 via OpenRouter
+- Prompt engineering crítico para qualidade
+- Consulte `/docs/guides/PROMPT_*` antes de alterar prompts
+- Biblioteca de prompts testados em `/docs/guides/`
+
+## 🧪 Testes
+
+- Sempre teste fluxo completo: prompt → geração → pagamento → download
+- Consulte `/docs/reports/FULL_UX_TEST_REPORT_V*.md` para casos de teste
+- Documente novos bugs em `/docs/reports/`
+
+## ⚠️ Cuidados Especiais
+
+1. **Nunca** exponha chaves de API no código
+2. **Sempre** use variáveis de ambiente
+3. **Consulte** documentação existente antes de reimplementar
+4. **Atualize** docs ao fazer mudanças
+5. **Preserve** histórico em `/docs/reports/`
+
+## 🔄 Workflow de Desenvolvimento
+
+1. Consulte `/docs/INDEX.md` para encontrar documentação relevante
+2. Leia reports em `/docs/reports/` se enfrentar problemas similares
+3. Faça mudanças no código
+4. Atualize documentação relacionada
+5. Adicione lições aprendidas em `/docs/reports/` se relevante
+
+## 📝 Estilo de Código
+
+- TypeScript strict mode
+- Componentes funcionais com hooks
+- Nomenclatura em inglês no código
+- Comentários em português quando necessário
+- Prettier para formatação

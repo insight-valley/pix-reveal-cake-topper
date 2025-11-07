@@ -10,8 +10,8 @@ max_rows = 1000
 [auth]
 enabled = true
 port = 54324
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://localhost:3000"]
+site_url = "http://localhost:9876"
+additional_redirect_urls = ["https://localhost:9876"]
 jwt_expiry_limit = 3600
 refresh_token_rotation_enabled = true
 refresh_token_reuse_interval = 10

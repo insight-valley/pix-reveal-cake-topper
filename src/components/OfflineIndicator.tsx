@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Wifi, WifiOff } from 'lucide-react';
+import { WifiIcon, WifiOffIcon } from './LordIcon';
 import { toast } from 'sonner';
 
 export const OfflineIndicator = () => {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isOnline, setIsOnline] = useState(true);
   const [showIndicator, setShowIndicator] = useState(false);
 
   useEffect(() => {
@@ -32,21 +32,25 @@ export const OfflineIndicator = () => {
       }
     };
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    // Only run client-side
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
 
-    // Initial check
-    if (!navigator.onLine) {
-      setShowIndicator(true);
-    }
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      // Initial check
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        setIsOnline(false);
+        setShowIndicator(true);
       }
-    };
+
+      return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+    }
   }, []);
 
   if (!showIndicator) return null;
@@ -55,17 +59,19 @@ export const OfflineIndicator = () => {
     <div className="fixed top-4 right-4 z-40 animate-fade-in">
       <Badge 
         variant={isOnline ? "default" : "destructive"}
-        className="flex items-center gap-2 py-2 px-3 shadow-soft"
+        className={`flex items-center gap-2 py-1.5 px-2.5 shadow-soft text-xs ${
+          isOnline ? "bg-success-500/90 hover:bg-success-500" : "bg-error-500/90 hover:bg-error-500"
+        }`}
       >
         {isOnline ? (
           <>
-            <Wifi className="w-3 h-3" />
-            Online
+            <WifiIcon size={10} trigger="hover" />
+            <span>Conectado</span>
           </>
         ) : (
           <>
-            <WifiOff className="w-3 h-3" />
-            Offline
+            <WifiOffIcon size={10} trigger="hover" />
+            <span>Sem conexão</span>
           </>
         )}
       </Badge>

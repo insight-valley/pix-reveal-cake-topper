@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=phmbpoacpivuqlmjnnoj&features=functions%2Cdevelopment%2Cdebugging%2Cdatabase%2Caccount%2Cdocs"
+    },
+    "abacate-pay": {
+      "command": "bun",
+      "args": ["/Users/gabriel.dantas/git/insight/abacatepay-mcp/src/index.ts"]
+    },
+"playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}

@@ -1,12 +1,13 @@
-const CACHE_NAME = 'cake-topper-v1';
-const STATIC_CACHE_NAME = 'cake-topper-static-v1';
-const DYNAMIC_CACHE_NAME = 'cake-topper-dynamic-v1';
+const CACHE_NAME = 'cake-topper-v2';
+const STATIC_CACHE_NAME = 'cake-topper-static-v2';
+const DYNAMIC_CACHE_NAME = 'cake-topper-dynamic-v2';
 
-// Resources to cache immediately
+// Resources to cache immediately (only existing files)
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/pwa-icons/icon-192x192.png',
+  '/pwa-icons/icon-72x72.png',
+  '/pwa-icons/icon-128x128.png',
   '/pwa-icons/icon-512x512.png',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap'
 ];
@@ -26,7 +27,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and remove API endpoint caches
 self.addEventListener('activate', (event) => {
   console.log('Service Worker activating...');
   event.waitUntil(
@@ -40,15 +41,44 @@ self.addEventListener('activate', (event) => {
         })
       );
     }).then(() => {
+      // Clean up any cached API endpoints (especially payment-status)
+      return caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
+        return cache.keys().then((keys) => {
+          return Promise.all(
+            keys.map((request) => {
+              const url = new URL(request.url);
+              // Remove any cached API endpoints
+              if (url.pathname.startsWith('/api/')) {
+                console.log('Removing cached API endpoint:', url.pathname);
+                return cache.delete(request);
+              }
+            })
+          );
+        });
+      });
+    }).then(() => {
       return self.clients.claim();
     })
   );
 });
 
+// Utility function to check if a URL scheme is cacheable
+function isCacheableScheme(url) {
+  const scheme = new URL(url).protocol;
+  // Only cache http/https schemes, exclude chrome-extension, data, blob, etc.
+  return scheme === 'http:' || scheme === 'https:';
+}
+
 // Fetch event - serve cached content when offline
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Skip caching for unsupported schemes (chrome-extension, data, blob, etc.)
+  if (!isCacheableScheme(request.url)) {
+    event.respondWith(fetch(request));
+    return;
+  }
 
   // Handle navigation requests
   if (request.mode === 'navigate') {
@@ -61,8 +91,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle API requests
-  if (url.pathname.startsWith('/functions/') || url.hostname.includes('supabase')) {
+  // Handle API requests - never cache payment status or polling endpoints
+  const isPaymentStatusEndpoint = url.pathname.includes('/payment-status');
+  const isPollingEndpoint = url.searchParams.has('_t'); // Timestamp param indicates polling
+  
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/functions/') || url.hostname.includes('supabase')) {
+    // For payment status and polling endpoints, always fetch fresh (network-only)
+    if (isPaymentStatusEndpoint || isPollingEndpoint) {
+      event.respondWith(fetch(request));
+      return;
+    }
+    
+    // For other API requests, use network-first strategy (only cache on offline)
     event.respondWith(
       fetch(request)
         .then((response) => {
@@ -71,18 +111,39 @@ self.addEventListener('fetch', (event) => {
             return response;
           }
 
-          const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE_NAME)
-            .then((cache) => {
-              cache.put(request, responseClone);
-            });
+          // Only cache if explicitly allowed (not payment-status)
+          if (!isPaymentStatusEndpoint && !isPollingEndpoint) {
+            const responseClone = response.clone();
+            caches.open(DYNAMIC_CACHE_NAME)
+              .then((cache) => {
+                cache.put(request, responseClone);
+              })
+              .catch((error) => {
+                console.warn('Failed to cache API response:', error);
+              });
+          }
 
           return response;
         })
         .catch(() => {
-          return caches.match(request);
+          // Only serve from cache if not payment-status endpoint
+          if (!isPaymentStatusEndpoint && !isPollingEndpoint) {
+            return caches.match(request);
+          }
+          // For payment-status, fail if offline (don't serve stale data)
+          return new Response(JSON.stringify({ error: 'Offline' }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' }
+          });
         })
     );
+    return;
+  }
+
+  // Handle other requests with cache-first strategy (but never cache API endpoints)
+  if (url.pathname.startsWith('/api/')) {
+    // All API endpoints should bypass cache
+    event.respondWith(fetch(request));
     return;
   }
 
@@ -105,6 +166,9 @@ self.addEventListener('fetch', (event) => {
             caches.open(DYNAMIC_CACHE_NAME)
               .then((cache) => {
                 cache.put(request, responseClone);
+              })
+              .catch((error) => {
+                console.warn('Failed to cache resource:', error, 'URL:', request.url);
               });
 
             return response;

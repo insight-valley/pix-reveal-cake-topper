@@ -1,36 +1,21 @@
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useRef } from "react";
+import { toast } from "sonner";
+import {
+  generateImageAPI,
+  type GenerateImageResponse,
+} from "@/services/imageGenerator";
+import { APP_MESSAGES, APP_CONFIG } from "@/constants";
 
 interface GenerateImageParams {
   prompt: string;
-  imageUrl: string;
-}
-
-interface GenerateImageResponse {
-  imageUrl: string;
-  metadata: {
-    usage: {
-      totalTokens: number;
-      inputTokens: number;
-      outputTokens: number;
-      inputTokensDetails: {
-        textTokens: number;
-        imageTokens: number;
-      };
-    };
-    cost: {
-      inputCost: string;
-      outputCost: string;
-      totalCost: string;
-    };
-    processingTime: number;
-    model: string;
-  };
+  imageId: string;
 }
 
 interface UseImageGenerationReturn {
-  generateImage: (params: GenerateImageParams) => Promise<string | null>;
+  generateImage: (
+    params: GenerateImageParams
+  ) => Promise<GenerateImageResponse | null>;
+  cancelGeneration: () => void;
   isGenerating: boolean;
   error: string | null;
 }
@@ -38,165 +23,125 @@ interface UseImageGenerationReturn {
 export const useImageGeneration = (): UseImageGenerationReturn => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const checkCredits = async (): Promise<boolean> => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error('Usuário não autenticado');
-        return false;
-      }
-
-      // Buscar créditos do usuário
-      const { data: userData, error: userError } = await supabase
-        .from('user_profiles')
-        .select('credits')
-        .eq('user_id', user.id)
-        .single();
-
-      if (userError) {
-        console.error('Erro ao verificar créditos:', userError);
-        toast.error('Erro ao verificar créditos');
-        return false;
-      }
-
-      if (!userData || userData.credits < 2) {
-        toast.error('Créditos insuficientes. Você precisa de 2 créditos para gerar uma imagem.');
-        return false;
-      }
-
-      return true;
-    } catch (err) {
-      console.error('Erro na verificação de créditos:', err);
-      toast.error('Erro ao verificar créditos');
-      return false;
-    }
-  };
-
-  const consumeCredits = async (amount: number): Promise<boolean> => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return false;
-
-      const { error } = await supabase.rpc('consume_credits', {
-        user_id: user.id,
-        amount: amount
-      });
-
-      if (error) {
-        console.error('Erro ao consumir créditos:', error);
-        return false;
-      }
-
-      return true;
-    } catch (err) {
-      console.error('Erro ao consumir créditos:', err);
-      return false;
-    }
-  };
-
-  const saveToDatabase = async (originalUrl: string, generatedUrl: string, prompt: string, metadata: any): Promise<void> => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { error } = await supabase
-        .from('generated_images')
-        .insert({
-          user_id: user.id,
-          original_image_url: originalUrl,
-          generated_image_url: generatedUrl,
-          prompt: prompt,
-          metadata: metadata,
-          created_at: new Date().toISOString()
-        });
-
-      if (error) {
-        console.error('Erro ao salvar no banco:', error);
-        toast.error('Erro ao salvar histórico da imagem');
-      }
-    } catch (err) {
-      console.error('Erro ao salvar no banco:', err);
-    }
-  };
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const showCelebration = () => {
-    // Trigger confetti animation
-    toast.success('🎉 Imagem gerada com sucesso!', {
-      description: 'Sua nova imagem está pronta!'
+    toast.success(APP_MESSAGES.success.imageGenerated, {
+      description: "Sua nova imagem está pronta!",
     });
   };
 
-  const generateImage = async (params: GenerateImageParams): Promise<string | null> => {
+  const cancelGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsGenerating(false);
+      setError(null);
+      toast.info("Geração cancelada");
+    }
+  };
+
+  const generateImage = async (
+    params: GenerateImageParams
+  ): Promise<GenerateImageResponse | null> => {
+    // Cancelar qualquer geração anterior
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
     setIsGenerating(true);
     setError(null);
 
     try {
-      // 1. Verificar créditos antes da geração
-      const hasCredits = await checkCredits();
-      if (!hasCredits) {
-        return null;
-      }
+      console.log("Gerando imagem com:", params);
 
-      // 2. Chamar a edge function
-      console.log('Chamando edge function generate-image com:', params);
-      
-      const { data, error: functionError } = await supabase.functions.invoke('generate-image', {
-        body: {
-          prompt: params.prompt,
-          imageUrl: params.imageUrl
-        }
-      });
+      const data = await generateImageAPI(params, abortControllerRef.current.signal);
 
-      if (functionError) {
-        console.error('Erro na edge function:', functionError);
-        setError(functionError.message || 'Erro ao gerar imagem');
-        toast.error('Erro ao gerar imagem: ' + (functionError.message || 'Erro desconhecido'));
-        return null;
-      }
-
-      if (!data || !data.imageUrl) {
-        const errorMsg = data?.error || 'Resposta inválida da API';
-        console.error('Resposta inválida:', data);
+      if (!data || !data.previewUrl || !data.imageId) {
+        const errorMsg = "Resposta inválida da API";
+        console.error("Resposta inválida:", data);
         setError(errorMsg);
-        toast.error('Erro ao gerar imagem: ' + errorMsg);
+        toast.error(`${APP_MESSAGES.errors.generationFailed}: ${errorMsg}`);
         return null;
       }
 
-      // 3. Consumir créditos apenas se bem-sucedida
-      const creditsConsumed = await consumeCredits(2);
-      if (!creditsConsumed) {
-        toast.error('Erro ao consumir créditos');
-        return null;
-      }
-
-      // 4. Salvar no banco
-      await saveToDatabase(params.imageUrl, data.imageUrl, params.prompt, data.metadata);
-
-      // 5. Mostrar celebração
       showCelebration();
 
-      console.log('Imagem gerada com sucesso:', {
-        imageUrl: data.imageUrl,
-        metadata: data.metadata
+      console.log("Imagem gerada com sucesso:", {
+        imageId: data.imageId,
+        previewUrl: data.previewUrl,
+        metadata: data.metadata,
       });
 
-      return data.imageUrl;
-
+      abortControllerRef.current = null;
+      return data;
     } catch (err) {
-      console.error('Erro na geração de imagem:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
+      // Se foi cancelado, não mostrar erro
+      if (err instanceof Error && err.name === "AbortError") {
+        setIsGenerating(false);
+        abortControllerRef.current = null;
+        return null;
+      }
+
+      console.error("Erro na geração de imagem:", err);
+
+      const error = err as Error & {
+        status?: number;
+        errorType?: string;
+        retryable?: boolean;
+      };
+
+      const errorMessage = error.message || "Erro desconhecido";
       setError(errorMessage);
-      toast.error('Erro ao gerar imagem: ' + errorMessage);
+
+      // Determinar mensagem apropriada baseada no tipo de erro
+      let message: string;
+
+      if (error.status && error.status >= 500) {
+        // Erro do servidor (500+)
+        message = APP_MESSAGES.errors.serverError;
+      } else if (error.errorType === "server_error") {
+        // Erro do servidor identificado pela API
+        message = APP_MESSAGES.errors.openAIError;
+      } else if (
+        errorMessage.includes("fetch") ||
+        errorMessage.includes("network") ||
+        errorMessage.includes("Failed to fetch")
+      ) {
+        // Erro de rede
+        message = APP_MESSAGES.errors.networkError;
+      } else {
+        // Outros erros - usar mensagem da API se disponível, senão mensagem genérica
+        message =
+          errorMessage !== "Erro desconhecido"
+            ? errorMessage
+            : APP_MESSAGES.errors.generationFailed;
+      }
+
+      toast.error(message, {
+        duration: 8000,
+        description: error.retryable
+          ? `Você pode tentar novamente. Se o problema persistir, entre em contato: ${APP_CONFIG.urls.support.replace(
+              "mailto:",
+              ""
+            )}`
+          : undefined,
+      });
+
       return null;
     } finally {
-      setIsGenerating(false);
+      if (!abortControllerRef.current?.signal.aborted) {
+        setIsGenerating(false);
+        abortControllerRef.current = null;
+      }
     }
   };
 
   return {
     generateImage,
+    cancelGeneration,
     isGenerating,
-    error
+    error,
   };
 };
