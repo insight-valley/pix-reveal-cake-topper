@@ -5,44 +5,6 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["gru1"],
-  "env": {
-    "NEXT_PUBLIC_SITE_URL": {
-      "@type": "string",
-      "@description": "URL pública do site (ex: https://seu-dominio.vercel.app)"
-    },
-    "NEXT_PUBLIC_SUPABASE_URL": {
-      "@type": "string",
-      "@description": "URL do projeto Supabase"
-    },
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": {
-      "@type": "string",
-      "@description": "Chave anônima do Supabase"
-    },
-    "SUPABASE_SERVICE_ROLE_KEY": {
-      "@type": "secret",
-      "@description": "Chave service role do Supabase (sensível)"
-    },
-    "OPENAI_API_KEY": {
-      "@type": "secret",
-      "@description": "Chave de API da OpenAI (sensível)"
-    },
-    "ABACATE_PAY_API_KEY": {
-      "@type": "secret",
-      "@description": "Chave de API do AbacatePay (sensível)"
-    },
-    "LANGFUSE_PUBLIC_KEY": {
-      "@type": "secret",
-      "@description": "Chave pública do Langfuse para monitoramento (opcional)"
-    },
-    "LANGFUSE_SECRET_KEY": {
-      "@type": "secret",
-      "@description": "Chave secreta do Langfuse para monitoramento (opcional)"
-    },
-    "LANGFUSE_HOST": {
-      "@type": "string",
-      "@description": "URL do Langfuse (opcional, padrão: https://cloud.langfuse.com)"
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
