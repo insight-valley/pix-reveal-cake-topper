@@ -262,7 +262,7 @@ export function usePayment(): UsePaymentReturn {
     isDownloading,
     downloadError,
     downloadProgress: {
-      percentage,
+      percentage: String(percentage || 0),
       size,
       elapsed,
       isInProgress: isDownloaderInProgress,
