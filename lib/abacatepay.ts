@@ -159,12 +159,23 @@ export class AbacatePayService {
       // O SDK retorna { error: data.message } mas a API pode retornar { error: "mensagem" }
       // Então precisamos verificar ambos os formatos
       if ("error" in pixQrCode && pixQrCode.error) {
-        const errorMessage =
-          typeof pixQrCode.error === "string"
-            ? pixQrCode.error
-            : pixQrCode.error.message ||
-              pixQrCode.error ||
-              "Erro desconhecido do AbacatePay";
+        let errorMessage: string;
+        const errorValue = pixQrCode.error;
+        if (typeof errorValue === "string") {
+          errorMessage = errorValue;
+        } else if (
+          typeof errorValue === "object" &&
+          errorValue !== null &&
+          "message" in errorValue
+        ) {
+          const errorObj = errorValue as { message?: unknown };
+          errorMessage =
+            typeof errorObj.message === "string"
+              ? errorObj.message
+              : String(errorValue) || "Erro desconhecido do AbacatePay";
+        } else {
+          errorMessage = String(errorValue) || "Erro desconhecido do AbacatePay";
+        }
         console.error("[AbacatePay] Error in response:", errorMessage);
         console.error(
           "[AbacatePay] Full error object:",

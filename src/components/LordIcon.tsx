@@ -17,7 +17,8 @@ import {
   XCircle,
   Wifi,
   WifiOff,
-  Smartphone
+  Smartphone,
+  History
 } from 'lucide-react';
 
 interface LordIconProps {
@@ -191,3 +192,57 @@ export const WifiOffIcon: React.FC<Omit<LordIconProps, 'src'>> = (props) => (
 export const SmartphoneIcon: React.FC<Omit<LordIconProps, 'src'>> = (props) => (
   <LordIcon src="https://cdn.lordicon.com/smartphone.json" {...props} />
 );
+
+// History icon
+export const HistoryIcon: React.FC<Omit<LordIconProps, 'src'>> = (props) => {
+  const IconComponent = History;
+  const iconStyle = {
+    color: 'currentColor',
+    ...(props.trigger === 'loop' && {
+      animation: 'spin 2s linear infinite'
+    })
+  };
+  
+  return (
+    <div
+      className={`inline-flex items-center justify-center ${props.className || ''} ${props.trigger === 'hover' ? 'hover:scale-110 transition-transform' : ''}`}
+      style={{ width: props.size || 24, height: props.size || 24 }}
+      onMouseEnter={props.onMouseEnter}
+      onMouseLeave={props.onMouseLeave}
+      onClick={props.onClick}
+    >
+      <IconComponent 
+        size={props.size || 24} 
+        style={iconStyle}
+        className={props.trigger === 'loop' ? 'animate-spin' : ''}
+      />
+    </div>
+  );
+};
+
+// X/Close icon
+export const XIcon: React.FC<Omit<LordIconProps, 'src'>> = (props) => {
+  const IconComponent = X;
+  const iconStyle = {
+    color: 'currentColor',
+    ...(props.trigger === 'loop' && {
+      animation: 'spin 2s linear infinite'
+    })
+  };
+  
+  return (
+    <div
+      className={`inline-flex items-center justify-center ${props.className || ''} ${props.trigger === 'hover' ? 'hover:scale-110 transition-transform' : ''}`}
+      style={{ width: props.size || 24, height: props.size || 24 }}
+      onMouseEnter={props.onMouseEnter}
+      onMouseLeave={props.onMouseLeave}
+      onClick={props.onClick}
+    >
+      <IconComponent 
+        size={props.size || 24} 
+        style={iconStyle}
+        className={props.trigger === 'loop' ? 'animate-spin' : ''}
+      />
+    </div>
+  );
+};
