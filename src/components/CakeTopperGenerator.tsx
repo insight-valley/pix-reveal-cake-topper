@@ -156,7 +156,7 @@ export const CakeTopperGenerator = () => {
           </div>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
             Crie topos de bolo personalizados com textos lindos e designs
-            únicos, totalmente grátis!
+            únicos!
           </p>
         </div>
 
@@ -166,7 +166,7 @@ export const CakeTopperGenerator = () => {
             <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               <div>
                 <label className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4 block">
-                  Digite o prompt detalhado para seu topo de bolo:
+                  Digite a receita de imagem detalhada para seu topo de bolo:
                 </label>
                 <Textarea
                   ref={textareaRef}
@@ -194,7 +194,7 @@ export const CakeTopperGenerator = () => {
                 </div>
               </div>
 
-              {/* Catálogo de Prompts e Histórico */}
+              {/* Catálogo de Receitas de Imagem e Histórico */}
               <div className="flex gap-2">
                 <PromptCatalog onSelectPrompt={handleSelectPrompt} />
                 <ImageHistory

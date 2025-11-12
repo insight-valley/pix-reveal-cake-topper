@@ -27,6 +27,7 @@ export const PromptCatalog = ({ onSelectPrompt }: PromptCatalogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("Todos");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedImage, setSelectedImage] = useState<PromptItem | null>(null);
 
   const categories = ["Todos", ...PROMPT_CATEGORIES.map((cat) => cat.name)];
 
@@ -57,169 +58,228 @@ export const PromptCatalog = ({ onSelectPrompt }: PromptCatalogProps) => {
     setIsOpen(false);
   };
 
+  const handleImageClick = (item: PromptItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedImage(item);
+  };
+
+  const handleUseFromDialog = () => {
+    if (selectedImage) {
+      handleSelectPrompt(selectedImage.prompt, selectedImage.title);
+      setSelectedImage(null);
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="lg" className="w-full">
-          <SparklesIcon 
-            size={20} 
-            trigger="hover" 
-            className="mr-2"
-          />
-          Catálogo de Prompts
-        </Button>
-      </DialogTrigger>
+    <>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="lg" className="w-full">
+            <SparklesIcon size={20} trigger="hover" className="mr-2" />
+            Catálogo de Receitas de Imagem
+          </Button>
+        </DialogTrigger>
 
-      <DialogContent className="max-w-6xl max-h-[80vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl">
-            <SparklesIcon 
-              size={24} 
-              trigger="loop" 
-              colors={{ primary: "hsl(var(--primary))" }}
-            />
-            Catálogo de Prompts para Topo de Bolo
-          </DialogTitle>
-        </DialogHeader>
+        <DialogContent className="max-w-6xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              Catálogo de Receitas de Imagem para Topo de Bolo
+            </DialogTitle>
+          </DialogHeader>
 
-        {/* Barra de busca */}
-        <div className="relative mb-4">
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-            <SearchIcon 
-              size={16} 
-              trigger="hover"
-              colors={{ primary: "hsl(var(--muted-foreground))" }}
+          {/* Barra de busca */}
+          <div className="relative mb-4">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+              <SearchIcon
+                size={16}
+                trigger="hover"
+                colors={{ primary: "hsl(var(--muted-foreground))" }}
+              />
+            </div>
+            <Input
+              type="text"
+              placeholder={APP_MESSAGES.placeholders.search}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
             />
           </div>
-          <Input
-            type="text"
-            placeholder={APP_MESSAGES.placeholders.search}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
 
-        {/* Filtros por categoria */}
-        <div className="flex flex-wrap gap-2 py-4 border-b">
-          {categories.map((category) => {
-            const categoryInfo = PROMPT_CATEGORIES.find(
-              (cat) => cat.name === category
-            );
-            return (
-              <Badge
-                key={category}
-                variant={
-                  selectedCategory === category ? "default" : "secondary"
-                }
-                className="cursor-pointer hover:scale-105 transition-transform"
-                onClick={() => {
-                  setSelectedCategory(category);
-                  setSearchTerm(""); // Limpar busca ao trocar categoria
-                }}
-              >
-                {category}
-                {categoryInfo && (
-                  <span
-                    className={`ml-1 w-2 h-2 rounded-full ${categoryInfo.color}`}
-                  />
-                )}
-              </Badge>
-            );
-          })}
-        </div>
-
-        {/* Grid de prompts */}
-        <div className="flex-1 overflow-y-auto pr-2">
-          {filteredPrompts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <SparklesIcon 
-                size={48} 
-                trigger="hover" 
-                colors={{ primary: "hsl(var(--muted-foreground))" }}
-                className="mb-4"
-              />
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                Nenhum prompt encontrado
-              </h3>
-              <p className="text-muted-foreground">
-                Tente ajustar sua busca ou escolher uma categoria diferente.
-              </p>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 py-4">
-              {filteredPrompts.map((item) => (
-                <Card
-                  key={item.id}
-                  className="cursor-pointer hover:shadow-soft transition-all duration-300 hover:scale-[1.02] border-2 border-primary/10 hover:border-primary/30"
-                  onClick={() => handleSelectPrompt(item.prompt, item.title)}
+          {/* Filtros por categoria */}
+          <div className="flex flex-wrap gap-2 py-4 border-b">
+            {categories.map((category) => {
+              const categoryInfo = PROMPT_CATEGORIES.find(
+                (cat) => cat.name === category
+              );
+              return (
+                <Badge
+                  key={category}
+                  variant={
+                    selectedCategory === category ? "default" : "secondary"
+                  }
+                  className="cursor-pointer hover:scale-105 transition-transform"
+                  onClick={() => {
+                    setSelectedCategory(category);
+                    setSearchTerm("");
+                  }}
                 >
-                  <CardContent className="p-4 space-y-3">
-                    {/* Imagem preview */}
-                    <div className="aspect-video bg-gradient-subtle rounded-lg overflow-hidden">
-                      <img
-                        src={item.imageUrl}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
+                  {category}
+                  {categoryInfo && (
+                    <span
+                      className={`ml-1 w-2 h-2 rounded-full ${categoryInfo.color}`}
+                    />
+                  )}
+                </Badge>
+              );
+            })}
+          </div>
 
-                    {/* Informações */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-foreground text-sm">
-                          {item.title}
-                        </h3>
-                        <Badge variant="secondary" className="text-xs">
-                          {item.category}
-                        </Badge>
+          {/* Grid de receitas */}
+          <div className="flex-1 overflow-y-auto pr-2">
+            {filteredPrompts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <SparklesIcon
+                  size={48}
+                  trigger="hover"
+                  colors={{ primary: "hsl(var(--muted-foreground))" }}
+                  className="mb-4"
+                />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Nenhuma receita encontrada
+                </h3>
+                <p className="text-muted-foreground">
+                  Tente ajustar sua busca ou escolher uma categoria diferente.
+                </p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 py-4">
+                {filteredPrompts.map((item) => (
+                  <Card
+                    key={item.id}
+                    className="cursor-pointer hover:shadow-soft transition-all duration-300 hover:scale-[1.02] border-2 border-primary/10 hover:border-primary/30"
+                    onClick={() => handleSelectPrompt(item.prompt, item.title)}
+                  >
+                    <CardContent className="p-4 space-y-3">
+                      {/* Imagem preview - clicável para ampliar */}
+                      <div
+                        className="aspect-video bg-gradient-subtle rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative group"
+                        onClick={(e) => handleImageClick(item, e)}
+                      >
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                          <span className="opacity-0 group-hover:opacity-100 text-white text-xs font-medium bg-black/50 px-2 py-1 rounded transition-opacity">
+                            Clique para ampliar
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Tags */}
-                      {item.tags && item.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {item.tags.slice(0, 3).map((tag) => (
-                            <Badge
-                              key={tag}
-                              variant="outline"
-                              className="text-xs px-1 py-0"
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
+                      {/* Informações */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold text-foreground text-sm">
+                            {item.title}
+                          </h3>
+                          <Badge variant="secondary" className="text-xs">
+                            {item.category}
+                          </Badge>
                         </div>
-                      )}
 
-                      <p className="text-xs text-muted-foreground line-clamp-3">
-                        {item.prompt.substring(0, 120)}...
-                      </p>
-                    </div>
+                        {/* Tags */}
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {item.tags.slice(0, 3).map((tag) => (
+                              <Badge
+                                key={tag}
+                                variant="outline"
+                                className="text-xs px-1 py-0"
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
 
-                    {/* Botão de seleção */}
-                    <Button
-                      size="sm"
-                      variant="gradient"
-                      className="w-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSelectPrompt(item.prompt, item.title);
-                      }}
-                    >
-                      <SparklesIcon 
-                        size={16} 
-                        trigger="click" 
-                        className="mr-1"
-                      />
-                      Usar este Prompt
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                        <p className="text-xs text-muted-foreground line-clamp-3">
+                          {item.prompt.substring(0, 120)}...
+                        </p>
+                      </div>
+
+                      {/* Botão de seleção */}
+                      <Button
+                        size="sm"
+                        variant="gradient"
+                        className="w-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelectPrompt(item.prompt, item.title);
+                        }}
+                      >
+                        <SparklesIcon
+                          size={16}
+                          trigger="click"
+                          className="mr-1"
+                        />
+                        Usar esta Receita
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para imagem ampliada */}
+      <Dialog
+        open={selectedImage !== null}
+        onOpenChange={(open) => !open && setSelectedImage(null)}
+      >
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          {selectedImage && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-xl">
+                  {selectedImage.title}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="flex-1 overflow-y-auto flex items-center justify-center p-4 bg-muted/30">
+                <img
+                  src={selectedImage.imageUrl}
+                  alt={selectedImage.title}
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
+                />
+              </div>
+              <div className="border-t pt-4 space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="secondary">{selectedImage.category}</Badge>
+                  {selectedImage.tags?.map((tag) => (
+                    <Badge key={tag} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {selectedImage.prompt}
+                </p>
+                <Button
+                  variant="gradient"
+                  className="w-full"
+                  onClick={handleUseFromDialog}
+                >
+                  <SparklesIcon size={16} trigger="click" className="mr-1" />
+                  Usar esta Receita de Imagem
+                </Button>
+              </div>
+            </>
           )}
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

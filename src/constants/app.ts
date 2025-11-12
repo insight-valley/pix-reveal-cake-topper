@@ -63,16 +63,20 @@ export const APP_CONFIG = {
 export const APP_MESSAGES = {
   success: {
     imageGenerated: "🎉 Seu topo de bolo está pronto!",
-    promptSelected: "Modelo selecionado!",
+    promptSelected: "Receita de imagem selecionada!",
     imageSaved: "Imagem salva com sucesso!",
   },
 
   errors: {
     emptyText: "Por favor, descreva como você quer seu topo de bolo!",
-    generationFailed: "Não conseguimos criar sua imagem agora. Tente novamente em alguns instantes.",
-    networkError: "Sem conexão com a internet. Verifique sua rede e tente novamente.",
-    invalidInput: "Sua descrição está muito longa. Use no máximo {max} caracteres.",
-    apiError: "Serviço temporariamente indisponível. Tente novamente em alguns instantes.",
+    generationFailed:
+      "Não conseguimos criar sua imagem agora. Tente novamente em alguns instantes.",
+    networkError:
+      "Sem conexão com a internet. Verifique sua rede e tente novamente.",
+    invalidInput:
+      "Sua descrição está muito longa. Use no máximo {max} caracteres.",
+    apiError:
+      "Serviço temporariamente indisponível. Tente novamente em alguns instantes.",
     serverError:
       "Ops! Algo deu errado ao criar sua imagem. Por favor, tente novamente. Se o problema continuar, entre em contato conosco.",
     openAIError:
@@ -88,13 +92,13 @@ export const APP_MESSAGES = {
   placeholders: {
     promptInput:
       "Ex: Topo de bolo em estilo adesivo recortado, tema 'Parabéns Ana' 100% rosa...",
-    search: "Buscar modelos por palavra-chave...",
+    search: "Buscar receitas por palavra-chave...",
   },
 } as const;
 
 // Configurações de SEO e Meta
 export const SEO_CONFIG = {
-  title: "Gerador de Topo de Bolo com IA - Grátis",
+  title: "Gerador de Topo de Bolo com IA",
   description:
     "Crie toppers de bolo personalizados com inteligência artificial. Designs únicos, alta qualidade e totalmente gratuito. Sem cadastro necessário!",
   keywords: [
@@ -103,7 +107,6 @@ export const SEO_CONFIG = {
     "personalizado",
     "IA",
     "inteligência artificial",
-    "grátis",
     "aniversário",
     "festa",
     "celebração",

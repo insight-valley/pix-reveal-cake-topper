@@ -693,7 +693,7 @@ export default function LandingPage() {
                 className="text-lg px-10 py-6 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
               >
                 <Zap className="w-5 h-5 mr-2" />
-                Experimentar Agora Grátis
+                Experimentar Agora
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
