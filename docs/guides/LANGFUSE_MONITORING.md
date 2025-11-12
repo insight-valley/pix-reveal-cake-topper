@@ -29,7 +29,7 @@ Trace: cake-topper-image-generation
 │  └─ imageUrl: "data:image/png..."
 │
 ├─ Generation: openai-image-generation
-│  ├─ Model: dall-e-3
+│  ├─ Model: gpt-image-1
 │  ├─ Input Prompt: "Create a beautiful cake topper..."
 │  ├─ Settings: { size: "1024x1024", quality: "standard" }
 │  ├─ Output: { imageGenerated: true, imageSizeKB: 245 }
@@ -57,7 +57,7 @@ Trace: cake-topper-image-generation
 ### Custos
 - **Localização**: Dashboard → Metrics → Costs
 - **O que observar**: Custo por geração e total diário
-- **Nota**: DALL-E 3 cobra por imagem, não por tokens
+- **Nota**: GPT Image 1 cobra por tokens (entrada de texto e saída de imagem)
 
 ### Throughput
 - **Localização**: Dashboard → Metrics → Throughput

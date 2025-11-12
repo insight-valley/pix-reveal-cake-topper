@@ -105,7 +105,6 @@ CRITICAL REQUIREMENTS FOR PRINT AND CUT:
 - Leave adequate spacing (minimum 1.5cm) between different elements to allow clean cutting
 - Use a flat sticker-style design with clear white outlines that separate each element from the background
 - The design should look like individual stickers that can be cut out separately with scissors
-- All elements should have a clean, bold outline to facilitate cutting along the edges
 
 STYLE: The design should be elegant, festive, and suitable for a celebration cake. Use vibrant colors but ensure contrast with the white borders. The overall style must be clean and printable.`;
 
@@ -117,13 +116,13 @@ STYLE: The design should be elegant, festive, and suitable for a celebration cak
     // Criar generation no Langfuse para rastrear a chamada OpenAI
     const generation = trace?.generation({
       name: "openai-image-generation",
-      model: "dall-e-3",
+      model: "gpt-image-1",
       input: enhancedPrompt,
       metadata: {
         requestId,
         originalPrompt: prompt,
         size: "1024x1024",
-        quality: "standard",
+        quality: "high",
       },
     });
 
@@ -139,11 +138,11 @@ STYLE: The design should be elegant, festive, and suitable for a celebration cak
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "dall-e-3",
+          model: "gpt-image-1",
           prompt: enhancedPrompt,
           n: 1,
           size: "1024x1024",
-          quality: "standard",
+          quality: "high",
         }),
       }
     );
@@ -187,7 +186,8 @@ STYLE: The design should be elegant, festive, and suitable for a celebration cak
       const isServerError = response.status >= 500;
       const errorMessage = isServerError
         ? "Ocorreu um erro inesperado ao gerar sua imagem. Por favor, tente novamente. Se o problema persistir, entre em contato conosco para que possamos ajudar."
-        : errorData.error?.message || "Erro ao processar sua solicitação. Tente novamente.";
+        : errorData.error?.message ||
+          "Erro ao processar sua solicitação. Tente novamente.";
 
       return NextResponse.json(
         {
@@ -253,7 +253,7 @@ STYLE: The design should be elegant, festive, and suitable for a celebration cak
     const metadata = {
       usage: generationUsage,
       processingTime: totalDuration,
-      model: "dall-e-3",
+      model: "gpt-image-1",
     };
 
     console.log(`[${requestId}] Image generation successful:`, {
@@ -261,7 +261,7 @@ STYLE: The design should be elegant, festive, and suitable for a celebration cak
       imageSize: imageData.length
         ? `${Math.round(imageData.length / 1024)}KB`
         : "URL",
-      model: "dall-e-3",
+      model: "gpt-image-1",
     });
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

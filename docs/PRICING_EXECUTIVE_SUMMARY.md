@@ -20,10 +20,10 @@ Fase Scale (Ano 2+):         R$ 2-5 (dinâmico)
 
 ### Custo Variável Total
 ```
-OpenAI DALL-E 3 (HD 1024x1024):  R$ 0,11
-Taxa PIX (1,99% + R$ 0,10):      R$ 0,12 (em R$ 1,00)
+OpenAI GPT Image 1 (HD 1024x1024):  R$ 0,11
+Taxa PIX (1,99% + R$ 0,10):         R$ 0,12 (em R$ 1,00)
 ────────────────────────────────────────
-TOTAL VARIÁVEL:                   R$ 0,23
+TOTAL VARIÁVEL:                      R$ 0,23
 ```
 
 ### Custo Fixo Mensal (Startup Phase)
@@ -106,7 +106,7 @@ ROI do cliente: 2.500% - 9.900%
 
 ### O que o cliente ganha?
 
-- ✅ Design profissional DALL-E 3 HD
+- ✅ Design profissional GPT Image 1 HD
 - ✅ Personalização infinita
 - ✅ Entrega instantânea (5min vs 2-3 dias)
 - ✅ Conveniência mobile

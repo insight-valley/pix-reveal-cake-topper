@@ -22,9 +22,9 @@
 
 ### 1. Custos Variáveis (Por Imagem Gerada)
 
-#### 1.1 OpenAI DALL-E 3 API
+#### 1.1 OpenAI GPT Image 1 API
 ```
-Modelo: DALL-E 3
+Modelo: GPT Image 1
 Qualidade: HD (High Definition)
 Resolução: 1024x1024
 Custo unitário: USD $0,02 por imagem
@@ -264,7 +264,7 @@ IA genérica (ChatGPT Pro): $20/mês (ilimitado)
 - ✅ Sem assinatura mensal
 - ✅ Pay-per-use (mais barato que Canva se uso ocasional)
 - ✅ Instant delivery
-- ✅ Alta qualidade (DALL-E 3 HD)
+- ✅ Alta qualidade (GPT Image 1 HD)
 - ✅ Pronto para impressão
 
 **Posicionamento Recomendado:**
@@ -621,7 +621,7 @@ Resultado: Impossível de escalar com margem tão apertada
 - 💰 Economiza R$ 49-199 vs designer
 - ⏱️ Economiza 2-3 dias de espera
 - 🎨 Personalização infinita vs produto pronto
-- ✨ Qualidade profissional DALL-E 3 HD
+- ✨ Qualidade profissional GPT Image 1 HD
 - 📱 Conveniência mobile-first
 
 **Empresa Ganha:**
@@ -658,7 +658,7 @@ Resultado: Impossível de escalar com margem tão apertada
 
 ### B. Custos Detalhados OpenAI
 
-**DALL-E 3 Pricing (2025):**
+**GPT Image 1 Pricing (2025):**
 ```
 Standard (1024x1024): $0.02/imagem
 HD (1024x1024): $0.04/imagem
@@ -667,7 +667,7 @@ HD (1792x1024): $0.06/imagem
 ```
 
 **Nosso Uso:**
-- Modelo: DALL-E 3 HD
+- Modelo: GPT Image 1 HD
 - Resolução: 1024x1024
 - Custo: $0.02/imagem = R$ 0,11 (USD 1 = BRL 5.50)
 

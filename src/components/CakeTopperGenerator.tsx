@@ -34,11 +34,16 @@ export const CakeTopperGenerator = () => {
   const [selectedPrompt, setSelectedPrompt] = useState<string>("");
   const [showCheckout, setShowCheckout] = useState(false);
   const [generatedImageId, setGeneratedImageId] = useState<string | null>(null);
-  const [generationStartTime, setGenerationStartTime] = useState<number | null>(null);
-  const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState<number | null>(null);
+  const [generationStartTime, setGenerationStartTime] = useState<number | null>(
+    null
+  );
+  const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState<
+    number | null
+  >(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { generateImage, cancelGeneration, isGenerating, error } = useImageGeneration();
+  const { generateImage, cancelGeneration, isGenerating, error } =
+    useImageGeneration();
 
   // Atualizar tempo estimado durante geração
   useEffect(() => {
@@ -92,14 +97,14 @@ export const CakeTopperGenerator = () => {
       setGeneratedImage(result.previewUrl);
       setGenerationStartTime(null);
       setEstimatedTimeRemaining(null);
-      
+
       // Salvar no histórico
       addToImageHistory({
         id: imageId,
         previewUrl: result.previewUrl,
         prompt: text,
       });
-      
+
       toast.success(
         "Prévia gerada com sucesso! Prossiga para o pagamento para baixar em HD."
       );
@@ -145,19 +150,9 @@ export const CakeTopperGenerator = () => {
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8 animate-fade-in">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <SparklesIcon
-              size={32}
-              trigger="loop"
-              className="text-primary animate-bounce-soft"
-            />
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               Gerador de Topo de Bolo
             </h1>
-            <SparklesIcon
-              size={32}
-              trigger="loop"
-              className="text-primary animate-bounce-soft"
-            />
           </div>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
             Crie topos de bolo personalizados com textos lindos e designs

@@ -120,7 +120,7 @@ Resultado esperado: Todos os elementos decorativos separados e recortáveis
 
 ## ⚠️ Considerações
 
-### Modelo de IA (DALL-E 3)
+### Modelo de IA (GPT Image 1)
 - O modelo OpenAI é bom em seguir instruções detalhadas
 - Usar CAPS em "CRITICAL REQUIREMENTS" aumenta ênfase
 - Percentagens (10-12%) ajudam o modelo a entender proporções

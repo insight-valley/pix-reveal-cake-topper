@@ -754,7 +754,7 @@ O projeto está em **transição híbrida**:
 
 - [ ] Sistema de autenticação (histórico de pedidos)
 - [ ] Painel admin para gerenciar prompts
-- [ ] Integração com outras IAs (DALL-E 3, Midjourney)
+- [ ] Integração com outras IAs (GPT Image 1, Midjourney)
 - [ ] Sistema de templates editáveis
 - [ ] Exportar em múltiplos formatos (PNG, SVG, PDF)
 - [ ] Implementar assinatura mensal (unlimited downloads)
