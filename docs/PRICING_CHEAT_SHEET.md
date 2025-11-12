@@ -18,7 +18,7 @@
 
 ### Por Imagem
 ```
-OpenAI DALL-E 3:    R$ 0,11
+OpenAI GPT Image 1: R$ 0,11
 Taxa PIX (R$ 1):    R$ 0,12
 ───────────────────────────
 TOTAL:              R$ 0,23

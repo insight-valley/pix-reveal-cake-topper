@@ -7,7 +7,7 @@
 
 ## 🎯 Objetivo
 
-Armazenar imagens geradas pelo DALL-E (OpenAI) de forma segura, com acesso controlado via URLs assinadas após pagamento.
+Armazenar imagens geradas pelo GPT Image 1 (OpenAI) de forma segura, com acesso controlado via URLs assinadas após pagamento.
 
 ---
 
@@ -313,6 +313,3 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 **Última atualização:** 2025-10-22  
 **Status:** Bucket precisa ser criado (pendente)
-
-
-
